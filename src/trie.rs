@@ -8,7 +8,7 @@ pub struct Trie {
     root: Node
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Node {
     name: &'static str,
     handler: *mut u8,
@@ -22,20 +22,26 @@ impl Trie {
         }
     }
 
+    pub fn root(&self) -> &Node {
+        &self.root
+    }
+
     pub fn call(&self, path: &'static str) -> Option<*mut u8> {
         let s: Vec<&'static str> = path.split('/').collect();
-        self.root.call(&s[0..])
+        let s = &s[1..];
+        self.root.call(s)
     }
 
     pub fn push(&mut self, path: &'static str, handler: *mut u8) {
         let s: Vec<&'static str> = path.split('/').collect();
+        let s = &s[1..];
         let mut node = &mut self.root;
         let mut deep = 0;
         while deep < s.len() {
             match node.get(s[deep]) {
                 Some(index) => {
-                   node = &mut node.child[index];
-                   deep += 1; 
+                    node = &mut node.child[index];
+                    deep += 1; 
                 },
 
                 None => {
@@ -102,9 +108,9 @@ impl Node {
                 return Some(node.handler)
             }
 
-            match self.get(path[deep]) {
+            match node.get(path[deep]) {
                 Some(index) => {
-                    node = &self.child[index];
+                    node = &node.child[index];
                     deep += 1;
                 },
                 None => {
