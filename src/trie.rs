@@ -26,10 +26,7 @@ impl Trie {
         let s: Vec<&'static str> = path.split('/').collect();
         let mut node = &mut self.root;
         let mut deep = 0;
-        loop {
-            if node.child.len() == 0 {
-                panic!("Path exists");
-            }
+        while deep < s.len() {
             match node.get(s[deep]) {
                 Some(index) => {
                    node = &mut node.child[index];
@@ -37,7 +34,8 @@ impl Trie {
                 },
 
                 None => {
-                    node.push(&s[deep..], handler)
+                    node.push(&s[deep..], handler);
+                    break;
                 }
             }
         }
