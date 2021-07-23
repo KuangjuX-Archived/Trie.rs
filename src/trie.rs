@@ -22,6 +22,11 @@ impl Trie {
         }
     }
 
+    pub fn call(&self, path: &'static str) -> Option<*mut u8> {
+        let s: Vec<&'static str> = path.split('/').collect();
+        self.root.call(&s[0..])
+    }
+
     pub fn push(&mut self, path: &'static str, handler: *mut u8) {
         let s: Vec<&'static str> = path.split('/').collect();
         let mut node = &mut self.root;
@@ -77,6 +82,35 @@ impl Node {
             });
             node = &mut node.child[0];
             deep += 1;
+        }
+    }
+
+    fn call(&self, path: &[&'static str]) -> Option<*mut u8> {
+        let mut deep = 0;
+        let mut node: &Node;
+        match self.get(path[deep]) {
+            Some(index) => {
+                node = &self.child[index];
+                deep += 1;
+            },
+            None => {
+                return None
+            }
+        }
+        loop {
+            if deep == path.len() {
+                return Some(node.handler)
+            }
+
+            match self.get(path[deep]) {
+                Some(index) => {
+                    node = &self.child[index];
+                    deep += 1;
+                },
+                None => {
+                    return None
+                }
+            }
         }
     }
 }
